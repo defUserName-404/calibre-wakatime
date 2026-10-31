@@ -5,6 +5,7 @@ cd "$(dirname "$0")"
 mkdir -p dist
 rm -f dist/WakaTime.zip
 (cd plugin && zip -qr ../dist/WakaTime.zip . -x '*.pyc' -x '__pycache__/*' -x '.DS_Store')
+zip -qj dist/WakaTime.zip LICENSE
 echo "built dist/WakaTime.zip"
 [ "$1" = "--install" ] && calibre-customize -a dist/WakaTime.zip
 exit 0
