@@ -11,6 +11,7 @@ import time
 from typing import Optional
 
 LOG_PATH = os.path.expanduser('~/.wakatime/calibre-wakatime.log')
+CLI_TIMEOUT = 20  # seconds, passed to wakatime-cli
 
 
 def log(msg: str) -> None:
@@ -35,8 +36,9 @@ def find_cli(override: str = '') -> Optional[str]:
 
 def build_command(cli: str, entity: str, project: str, category: str, plugin_ua: str,
                   ts: Optional[float] = None) -> list:
+    # --timeout must stay below our subprocess timeout so the CLI can fall back to its offline queue
     cmd = [cli, '--entity', entity, '--entity-type', 'app', '--category', category,
-           '--project', project, '--plugin', plugin_ua]
+           '--project', project, '--plugin', plugin_ua, '--timeout', str(CLI_TIMEOUT)]
     if ts is not None:
         cmd += ['--time', f'{ts:.6f}']
     return cmd
@@ -86,7 +88,7 @@ class Sender:
                     continue
                 entity = display_entity(title, cfg['hide_titles'])
                 cmd = build_command(cli, entity, project, cfg['category'], self._ua, ts)
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                r = subprocess.run(cmd, capture_output=True, text=True, timeout=CLI_TIMEOUT + 20)
                 log(f'heartbeat entity={entity!r} project={project!r} rc={r.returncode}'
                     + (f' err={r.stderr.strip()[:200]!r}' if r.returncode else ''))
             except Exception as e:

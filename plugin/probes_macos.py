@@ -6,7 +6,13 @@ import re
 import subprocess
 from typing import Optional
 
-_VIEWER_RE = re.compile(r'^\s*(\d+)\s+\S*/Contents/MacOS/ebook-viewer\S*(\s|$)')
+# Viewer app process, whatever the launch route made it look like:
+#   .../calibre.app/Contents/MacOS/ebook-viewer                              (direct launch)
+#   .../ebook-viewer.app/Contents/MacOS/ebook-viewer-placeholder-for-codesigning  (Finder / Dock)
+#   .../ebook-viewer.app/Contents/MacOS/calibre-parallel                     (launched from the calibre GUI)
+# The pipe workers nest deeper (ebook-viewer.app/Contents/ebook-edit.app/...) and must not match.
+_VIEWER_RE = re.compile(
+    r'^\s*(\d+)\s+(?:\S*/calibre\.app/Contents/MacOS/ebook-viewer|\S*/ebook-viewer\.app/Contents/MacOS/[^/\s]+)(?:\s|$)')
 _PID_RE = re.compile(r'\bpid\s*=\s*(\d+)')
 _IDLE_RE = re.compile(r'"HIDIdleTime"\s*=\s*(\d+)')
 
@@ -18,14 +24,17 @@ def _run(*cmd: str, timeout: float = 3.0) -> str:
         return ''
 
 
-def viewer_pids() -> tuple:
-    """Pids of running ebook-viewer app processes (not calibre-parallel workers living in the same bundle)."""
+def parse_viewer_pids(ps_output: str) -> tuple:
     pids = []
-    for line in _run('ps', '-axo', 'pid=,command=').splitlines():
+    for line in ps_output.splitlines():
         m = _VIEWER_RE.match(line)
-        if m:
+        if m and '--pipe-worker' not in line:
             pids.append(int(m.group(1)))
     return tuple(pids)
+
+
+def viewer_pids() -> tuple:
+    return parse_viewer_pids(_run('ps', '-axo', 'pid=,command='))
 
 
 def frontmost_pid() -> Optional[int]:
