@@ -16,6 +16,7 @@ from calibre_plugins.wakatime.sender import Sender, log
 
 PLUGIN_VERSION = '1.0.0'
 _ID_RE = re.compile(r'\((\d+)\)$')
+PREFERRED_FORMATS = ('EPUB', 'KEPUB', 'AZW3', 'MOBI', 'PDF')
 
 
 class Lookup:
@@ -52,11 +53,17 @@ class Lookup:
         return {k: self._known[k] for k in mtimes if k in self._known}
 
     def hint_path(self):
-        # book id of the last book calibre launched the viewer for; format picked via the viewer's own annots later
+        # calibre prepends (book_id, title) to 'gui_view_history' on every launch from the GUI.
+        # The format isn't recorded; a wrong guess only affects idle detection until the first page turn.
         try:
-            hist = self._db().pref('gui_view_history') or []
-            book_id, fmt = hist[0][0], hist[0][1]
-            return self._db().format_abspath(book_id, fmt)
+            db = self._db()
+            hist = db.pref('gui_view_history', [])
+            if not hist:
+                return None
+            book_id = hist[0][0]
+            fmts = db.formats(book_id)
+            fmt = next((f for f in PREFERRED_FORMATS if f in fmts), fmts[0] if fmts else None)
+            return db.format_abspath(book_id, fmt) if fmt else None
         except Exception as e:
             log(f'hint unavailable: {e!r}')
             return None
