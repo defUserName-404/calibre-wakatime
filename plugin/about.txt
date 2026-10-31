@@ -1,0 +1,4 @@
+Tracks time spent in the calibre e-book viewer and sends it to WakaTime
+(category "learning", entity = book title, project = library name).
+
+Requires wakatime-cli (installed by any WakaTime editor plugin) and ~/.wakatime.cfg.
