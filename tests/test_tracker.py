@@ -4,7 +4,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'plugin'))
 
-from tracker import Snapshot, Tracker, annots_key  # noqa: E402
+from tracker import Snapshot, Tracker, annots_key, viewer_state  # noqa: E402
 
 A = '/lib/Au/A (1)/A.epub'
 B = '/lib/Au/B (2)/B.epub'
@@ -77,6 +77,18 @@ class TrackerTest(unittest.TestCase):
         self.t.update(snap(1000))
         self.t.update(snap(1100, front=False))
         self.assertEqual(self.t.update(snap(1110)).reason, 'start')
+
+
+class ViewerStateTest(unittest.TestCase):
+    def test_not_running(self):
+        self.assertEqual(viewer_state(snap(1000, pids=()), None), 'viewer not running')
+
+    def test_running_without_book(self):
+        self.assertEqual(viewer_state(snap(1000, pids=(7, 3)), None),
+                         'viewer running (pid 3,7) but no book resolved')
+
+    def test_running_with_book(self):
+        self.assertEqual(viewer_state(snap(1000), A), f'viewer running (pid 1) book={A}')
 
 
 if __name__ == '__main__':

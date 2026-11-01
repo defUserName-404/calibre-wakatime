@@ -6,7 +6,7 @@ class WakaTimePlugin(InterfaceActionBase):
     description = 'Track e-book reading time (calibre viewer) in WakaTime'
     supported_platforms = ['osx']
     author = 'defUserName-404'
-    version = (1, 0, 1)
+    version = (1, 0, 2)
     minimum_calibre_version = (6, 0, 0)
     actual_plugin = 'calibre_plugins.wakatime.ui:WakaTimeAction'
 

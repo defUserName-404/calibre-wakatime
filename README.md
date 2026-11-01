@@ -4,7 +4,7 @@ calibre GUI plugin that sends e-book **reading time** to WakaTime (macOS only).
 
 - Heartbeat: `--entity-type app`, entity = book title, project = library name, category = `learning`.
 - Uses the existing `~/.wakatime/wakatime-cli` and `~/.wakatime.cfg` (no API key stored in the plugin).
-- Log: `~/.wakatime/calibre-wakatime.log`.
+- Log: `~/.wakatime/calibre-wakatime.log` (also records when the viewer is detected/lost and which book is open, so a silent "not tracking" shows up there).
 
 ## Install
 Requirements: macOS, calibre 6+ (tested on 9.17.0), and `wakatime-cli` with your API key. Any WakaTime

@@ -6,7 +6,7 @@ import time
 
 from calibre_plugins.wakatime import probes_macos as probes
 from calibre_plugins.wakatime.sender import log
-from calibre_plugins.wakatime.tracker import Snapshot, Tracker
+from calibre_plugins.wakatime.tracker import Snapshot, Tracker, viewer_state
 
 POLL_SECONDS = 5.0
 
@@ -23,6 +23,7 @@ class Monitor(threading.Thread):
         self._stop_evt = threading.Event()
         self.paused = False
         self.tracker = Tracker()
+        self._last_state = None
 
     def stop(self) -> None:
         self._stop_evt.set()
@@ -52,7 +53,12 @@ class Monitor(threading.Thread):
                 if self.paused or not self._get_cfg()['enabled']:
                     self.tracker.update(Snapshot(time.time()))
                     continue
-                hb = self.tracker.update(self._snapshot())
+                snap = self._snapshot()
+                hb = self.tracker.update(snap)
+                state = viewer_state(snap, self.tracker.book)
+                if state != self._last_state:
+                    log(state)
+                    self._last_state = state
                 if hb:
                     info = self._lookup.describe(hb.book_path)
                     if info:
