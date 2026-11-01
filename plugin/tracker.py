@@ -29,6 +29,16 @@ class Heartbeat:
     reason: str  # 'start' | 'book' | 'interval'
 
 
+def viewer_state(snap: Snapshot, book: Optional[str]) -> str:
+    """One-line description of what the monitor sees; the caller logs it only when it changes."""
+    if not snap.viewer_pids:
+        return 'viewer not running'
+    pids = ','.join(map(str, sorted(snap.viewer_pids)))
+    if book is None:
+        return f'viewer running (pid {pids}) but no book resolved'
+    return f'viewer running (pid {pids}) book={book}'
+
+
 class Tracker:
     def __init__(self, idle_timeout: float = 300.0, heartbeat_interval: float = 120.0):
         self.idle_timeout = idle_timeout

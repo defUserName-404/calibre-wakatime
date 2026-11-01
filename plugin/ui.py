@@ -14,7 +14,7 @@ from calibre_plugins.wakatime.config import get_cfg, prefs
 from calibre_plugins.wakatime.monitor import Monitor
 from calibre_plugins.wakatime.sender import Sender, log
 
-PLUGIN_VERSION = '1.0.1'
+PLUGIN_VERSION = '1.0.2'
 _ID_RE = re.compile(r'\((\d+)\)$')
 PREFERRED_FORMATS = ('EPUB', 'KEPUB', 'AZW3', 'MOBI', 'PDF')
 
